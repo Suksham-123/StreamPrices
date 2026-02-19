@@ -25,7 +25,7 @@ function Home() {
 
   const fetchProducts = (query = "", pin = "") => {
     setIsLoading(true); 
-    let url = 'http://localhost:3000/api/search';
+    let url = 'https://streamprices.onrender.com/api/search';
     if (query) url += `?q=${query}&pincode=${pin}`;
 
     fetch(url)

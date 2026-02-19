@@ -24,7 +24,7 @@ function Login() {
     const endpoint = isLoginView ? '/api/login' : '/api/signup';
     
     try {
-      const response = await fetch(`http://localhost:3000${endpoint}`, {
+      const response = await fetch(`https://streamprices.onrender.com${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
