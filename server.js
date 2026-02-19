@@ -1,10 +1,10 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const bcrypt = require('bcryptjs'); // THE NEW SECURITY GUARD
-const jwt = require('jsonwebtoken'); // THE VIP WRISTBAND MAKER
+const bcrypt = require('bcryptjs'); 
+const jwt = require('jsonwebtoken'); 
 const { scrapeRealData } = require('./scraper'); 
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -12,9 +12,9 @@ const PORT = process.env.PORT || 3000;
 const JWT_SECRET = "StreamPrices_Super_Secret_Key_2026";
 
 app.use(cors());
-app.use(express.json()); // CRITICAL: Allows our server to read JSON from React!
+app.use(express.json());
 
-mongoose.connect('mongodb+srv://admin:password1234@cluster0.hysusat.mongodb.net/priceAggregatorDB?appName=Cluster0')
+mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('✅ Server connected to MongoDB!'))
     .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
