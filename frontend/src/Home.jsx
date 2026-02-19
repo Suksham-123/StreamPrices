@@ -8,6 +8,11 @@ function Home() {
   const [isLoading, setIsLoading] = useState(false); 
   const navigate = useNavigate();
 
+  // 🌟 ENVIRONMENT-AWARE API ROUTING 🌟
+  const API_URL = import.meta.env.DEV 
+    ? "http://localhost:3000" 
+    : "https://streamprices.onrender.com";
+
   // THE BOUNCER: Check if the user has a VIP Token. If not, kick them to Login!
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -25,7 +30,9 @@ function Home() {
 
   const fetchProducts = (query = "", pin = "") => {
     setIsLoading(true); 
-    let url = 'https://streamprices.onrender.com/api/search';
+    
+    // 🔄 Updated to use the dynamic API_URL
+    let url = `${API_URL}/api/search`;
     if (query) url += `?q=${query}&pincode=${pin}`;
 
     fetch(url)

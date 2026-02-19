@@ -12,6 +12,12 @@ function Login() {
   
   const navigate = useNavigate();
 
+  // 🌟 ENVIRONMENT-AWARE API ROUTING 🌟
+  // If running locally (npm run dev), use localhost. If on Vercel, use Render!
+  const API_URL = import.meta.env.DEV 
+    ? "http://localhost:3000" 
+    : "https://streamprices.onrender.com";
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -24,7 +30,8 @@ function Login() {
     const endpoint = isLoginView ? '/api/login' : '/api/signup';
     
     try {
-      const response = await fetch(`https://streamprices.onrender.com${endpoint}`, {
+      // 🔄 Updated to use the dynamic API_URL
+      const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -69,6 +76,7 @@ function Login() {
               onChange={(e) => setEmail(e.target.value)}
               style={{ padding: '15px', borderRadius: '4px', border: '1px solid #444', backgroundColor: '#333', color: 'white', fontSize: '1rem' }}
             />
+            
             <input 
               type={showPassword ? "text" : "password"} 
               placeholder="Password" 
@@ -77,9 +85,10 @@ function Login() {
               onChange={(e) => setPassword(e.target.value)}
               style={{ padding: '15px', borderRadius: '4px', border: '1px solid #444', backgroundColor: '#333', color: 'white', fontSize: '1rem' }}
             />
+            
             {!isLoginView && (
               <input 
-                type="password" 
+                type={showPassword ? "text" : "password"} 
                 placeholder="Confirm Password" 
                 required
                 value={confirmPassword}
@@ -87,6 +96,7 @@ function Login() {
                 style={{ padding: '15px', borderRadius: '4px', border: '1px solid #444', backgroundColor: '#333', color: 'white', fontSize: '1rem' }}
               />
             )}
+            
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '-5px' }}>
               <input 
                 type="checkbox" 
@@ -112,7 +122,8 @@ function Login() {
           <p style={{ color: '#aaa', textAlign: 'center', marginTop: '30px', fontSize: '0.9rem' }}>
             {isLoginView ? "New to StreamPrices? " : "Already have an account? "}
             <span 
-              onClick={() => { setIsLoginView(!isLoginView); 
+              onClick={() => { 
+                setIsLoginView(!isLoginView); 
                 setError("");
                 setPassword(""); 
                 setConfirmPassword("");
