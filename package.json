@@ -17,7 +17,7 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.2.1",
-    "puppeteer": "^24.37.3",
+    "puppeteer": "^24.37.5",
     "puppeteer-core": "^24.37.5"
   }
 }

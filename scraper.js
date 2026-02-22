@@ -1,5 +1,17 @@
-const puppeteer = require('puppeteer-core');
-const chromium = require('@sparticuz/chromium');
+// --- DYNAMIC ENVIRONMENT ROUTING ---
+const isProduction = process.env.NODE_ENV === 'production';
+
+let puppeteer;
+let chromium;
+
+if (isProduction) {
+    // Load the Cloud-Ready Engine
+    puppeteer = require('puppeteer-core');
+    chromium = require('@sparticuz/chromium');
+} else {
+    // Load the Local Visual Engine
+    puppeteer = require('puppeteer');
+}
 
 // --- AMAZON MULTI-SCRAPER ---
 async function scrapeAmazon(browser, searchQuery) {
@@ -17,7 +29,7 @@ async function scrapeAmazon(browser, searchQuery) {
             let results = [];
             
             for (let el of elements) {
-                if (results.length >= 4) break; 
+                if (results.length >= 15) break; 
                 
                 const titleEl = el.querySelector('h2');
                 const priceEl = el.querySelector('.a-price-whole');
@@ -60,7 +72,7 @@ async function scrapeFlipkart(browser, searchQuery) {
             let results = [];
             
             for (let el of elements) {
-                if (results.length >= 4) break; 
+                if (results.length >= 15) break; 
                 
                 const titleEl = el.querySelector('div[class*="title"], img');
                 const rawPriceEl = Array.from(el.querySelectorAll('div')).find(d => d.innerText.startsWith('₹'));
@@ -90,7 +102,7 @@ async function scrapeFlipkart(browser, searchQuery) {
     }
 }
 
-// --- BLINKIT MULTI-SCRAPER
+// --- BLINKIT MULTI-SCRAPER  ---
 async function scrapeBlinkit(browser, searchQuery, userPincode) {
     console.log(`[Blinkit] Hacking the location popup for Pincode: ${userPincode}...`);
     const page = await browser.newPage();
@@ -98,38 +110,44 @@ async function scrapeBlinkit(browser, searchQuery, userPincode) {
     
     try {
         await page.goto('https://blinkit.com/', { waitUntil: 'domcontentloaded', timeout: 20000 });
-
+        try {
+            console.log(`[Blinkit] Checking for 'App Download' ad...`);
+            await page.waitForFunction(() => {
+                const elements = Array.from(document.querySelectorAll('button, a, span, div'));
+                const continueBtn = elements.find(el => el.innerText && el.innerText.toLowerCase().includes('continue on web'));
+                if (continueBtn) {
+                    continueBtn.click();
+                    return true;
+                }
+                return false;
+            }, { timeout: 3000 });
+            console.log(`[Blinkit] 💥 Dismissed the 'App Download' ad!`);
+            await new Promise(resolve => setTimeout(resolve, 1000)); // 
+        } catch (err) {
+        }
         const locationInputSelector = 'input[placeholder*="location"], input[placeholder*="area"], input[placeholder*="address"]';
         
         try {
             await page.waitForSelector(locationInputSelector, { timeout: 8000 });
             console.log(`[Blinkit] 🎯 Location box found! Injecting pincode: ${userPincode}`);
-            
-            await page.type(locationInputSelector, userPincode, { delay: 100 });
-            
+            await page.type(locationInputSelector, userPincode || '110001', { delay: 100 });
             await new Promise(resolve => setTimeout(resolve, 2000));
-            
             await page.keyboard.press('ArrowDown');
             await page.keyboard.press('Enter');
-            
-            console.log(`[Blinkit] 🔓 Location successfully bypassed! Waiting for homepage to load...`);
+            console.log(`[Blinkit] 🔓 Location successfully bypassed!`);
             await new Promise(resolve => setTimeout(resolve, 3000));
         } catch (err) {
-            console.log(`[Blinkit] No popup appeared. Proceeding to search...`);
+            console.log(`[Blinkit] No location popup appeared. Proceeding to search...`);
         }
-
         const searchUrl = `https://blinkit.com/s/?q=${encodeURIComponent(searchQuery)}`;
         await page.goto(searchUrl, { waitUntil: 'domcontentloaded', timeout: 15000 });
-        
         await new Promise(resolve => setTimeout(resolve, 3000));
-
         const data = await page.evaluate(() => {
             const results = [];
             const productElements = document.querySelectorAll('a[data-test-id="plp-product"]'); 
             
             productElements.forEach(el => {
-                if (results.length >= 4) return;
-
+                if (results.length >= 15) return; 
                 const titleEl = el.querySelector('div[class*="Product__ProductName"]');
                 const priceEl = el.querySelector('div[class*="Product__Price"]');
                 
@@ -145,17 +163,14 @@ async function scrapeBlinkit(browser, searchQuery, userPincode) {
             return results;
         });
 
-        if (data.length === 0) {
-            console.log(`[Blinkit] ❌ Still couldn't find products. (Selectors might have changed)`);
-        } else {
-            console.log(`[Blinkit] ✅ Hack successful! Found ${data.length} items!`);
-        }
+        if (data.length === 0) console.log(`[Blinkit] ❌ No products found.`);
+        else console.log(`[Blinkit] ✅ Found ${data.length} items!`);
         
         await page.close();
         return data || [];
 
     } catch (error) {
-        console.log(`[Blinkit] Scraper crashed during hack.`);
+        console.log(`[Blinkit] Scraper failed or timed out.`);
         await page.close();
         return []; 
     }
@@ -165,24 +180,39 @@ async function scrapeBlinkit(browser, searchQuery, userPincode) {
 async function scrapeRealData(searchQuery, userPincode) {
     console.log(`🚀 Starting Multi-Scraper for: ${searchQuery} in Pincode: ${userPincode}`);
     
-   const browser = await puppeteer.launch({
-        args: chromium.args,
-        defaultViewport: chromium.defaultViewport,
-        executablePath: await chromium.executablePath(),
-        headless: chromium.headless,
-        ignoreHTTPSErrors: true,
-    });
+    let browser;
+    if (isProduction) {
+        console.log("☁️ Launching Serverless Cloud Browser...");
+        browser = await puppeteer.launch({
+            args: chromium.args,
+            defaultViewport: chromium.defaultViewport,
+            executablePath: await chromium.executablePath(),
+            headless: chromium.headless,
+            ignoreHTTPSErrors: true,
+        });
+    } else {
+        console.log("💻 Launching Local Visual Browser...");
+        browser = await puppeteer.launch({ 
+            headless: false,
+            args: [
+                '--no-sandbox', 
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage'
+            ] 
+        });
+    }
     
-    // 1. ALL THREE ENGINES RUNNING IN PARALLEL
+    // 1. ALL ENGINES RUNNING IN PARALLEL
     const [amazonData, flipkartData, blinkitData] = await Promise.all([
         scrapeAmazon(browser, searchQuery),
         scrapeFlipkart(browser, searchQuery),
-        scrapeBlinkit(browser, searchQuery, userPincode) 
+        scrapeBlinkit(browser, searchQuery, userPincode)
     ]);
 
     await new Promise(resolve => setTimeout(resolve, 2000));
     await browser.close();
     
+    // 2. COMBINE DATA
     const rawData = [...amazonData, ...flipkartData, ...blinkitData]; 
 
     const junkWords = ['cable', 'controller', 'cooling', 'fan', 'cover', 'case', 'skin', 'godfall', 'stand'];
