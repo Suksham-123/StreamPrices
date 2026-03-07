@@ -24,3 +24,22 @@ This project utilizes a decoupled, three-tier architecture ensuring high scalabi
 2. **Location-Aware Caching:** Filters product availability strictly based on user delivery pincodes.
 3. **Smart Data Cleaning:** Custom Regex algorithms automatically filter out junk accessories (cables, cases) so only actual consoles/phones appear.
 4. **Secure Vault:** Dedicated user authentication gatekeeper blocking unauthorized searches.
+
+## 🌐 Live Demo
+- **Frontend App:** [Insert your Vercel link here]
+- **Backend API:** [Insert your Render link here]
+
+## 💻 Local Setup & Testing
+To run this project locally on your machine and bypass cloud bot-detection:
+
+1. **Clone the repository:**
+   `git clone [your-repo-link]`
+2. **Setup Backend:**
+   `cd StreamPrices`
+   `npm install`
+3. **Configure Environment:**
+   Create a `.env` file in the root directory:
+   `MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/priceAggregatorDB`
+4. **Start the Servers:**
+   - Terminal 1 (Backend): `node server.js`
+   - Terminal 2 (Frontend): `cd frontend && npm install && npm run dev`
