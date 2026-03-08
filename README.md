@@ -25,9 +25,11 @@ This project utilizes a decoupled, three-tier architecture ensuring high scalabi
 3. **Smart Data Cleaning:** Custom Regex algorithms automatically filter out junk accessories (cables, cases) so only actual consoles/phones appear.
 4. **Secure Vault:** Dedicated user authentication gatekeeper blocking unauthorized searches.
 
-## 🌐 Live Demo
-- **Frontend App:** [Insert your Vercel link here]
-- **Backend API:** [Insert your Render link here]
+## 🌐 Live Links
+- **Frontend Application:** [StreamPrices on Vercel](https://stream-prices.vercel.app)
+- **Backend API:** [StreamPrices API on Render](https://streamprices.onrender.com)
+
+---
 
 ## 💻 Local Setup & Testing
 To run this project locally on your machine and bypass cloud bot-detection:
