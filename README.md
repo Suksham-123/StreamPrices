@@ -1,5 +1,7 @@
 # StreamPrices ⚡
 
+https://stream-prices.vercel.app/
+
 A real-time, parallel-processing MERN stack e-commerce price aggregator built for localized deal finding.
 
 ## 🚀 The Problem & Solution
